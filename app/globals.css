@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+* {
+  box-sizing: border-box;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: #f5f5f5;
+  padding: 24px 16px;
+}
+
+.sidebar-item__collapsed {
+  width: 80px;
+}
+
+.sidebar__collapse-button {
+  cursor: pointer;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 16px;
+  background-color: #f5f5f5;
+  border: 1px solid #a9aeb4;
+  right: -10px;
+  top: 16px;
+  z-index: 10;
+}
+
+.sidebar-item {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.4s ease;
+}
+
+.sidebar-item__active {
+  transform: scale(1);
+  color: #333;
+}
+
+.sidebar-item__active-bg {
+  position: absolute;
+  inset: 0px;
+  border-radius: 8px;
+  color: #333;
+  background-color: #fefefe;
+}
+
+.sidebar-item__icon {
+  position: relative;
+  display: flex;
+}
+
+.sidebar-item__title {
+  position: relative;
+}
+
+.main-content {
+  background-color: #fefefe;
+  color: #333;
+  flex-grow: 1;
+  padding: 32px;
+}
+
+
+
