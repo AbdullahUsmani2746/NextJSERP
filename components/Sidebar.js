@@ -1,17 +1,26 @@
-"use client"
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { LuHome, LuMail, LuFolderClosed, LuStickyNote, LuBell, LuChevronRight, LuChevronLeft } from 'react-icons/lu';
-import clsx from 'clsx';
+"use client";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  LuHome,
+  LuMail,
+  LuFolderClosed,
+  LuStickyNote,
+  LuBell,
+  LuChevronRight,
+  LuChevronLeft,
+} from "react-icons/lu";
+import clsx from "clsx";
+import Link from "next/link";
 
 const SIDEBAR_ITEMS = [
-  { id: 'dashboard', title: 'Dashboard', icon: LuHome },
-  { id: 'organization', title: 'Organization', icon: LuHome },
+  { id: "", title: "Dashboard", icon: LuHome },
+  { id: "organization", title: "Organization", icon: LuHome },
 
-  { id: 'mail', title: 'Mail', icon: LuMail },
-  { id: 'projects', title: 'Projects', icon: LuFolderClosed },
-  { id: 'reports', title: 'Reports', icon: LuStickyNote },
-  { id: 'notifications', title: 'Notifications', icon: LuBell },
+  { id: "mail", title: "Mail", icon: LuMail },
+  { id: "projects", title: "Projects", icon: LuFolderClosed },
+  { id: "reports", title: "Reports", icon: LuStickyNote },
+  { id: "notifications", title: "Notifications", icon: LuBell },
 ];
 
 function Sidebar() {
@@ -48,36 +57,38 @@ function SidebarItem({ item, activeTab, setActiveTab, isSidebarCollapsed }) {
   const IconComponent = item.icon;
 
   return (
-    <motion.div
-      layout
-      className={clsx("sidebar-item", {
-        "sidebar-item__active": activeTab === item.id,
-      })}
-      onFocus={() => setActiveTab(item.id)}
-      onMouseOver={() => setActiveTab(item.id)}
-      onMouseLeave={() => setActiveTab(item.id)}
-    >
-      {activeTab === item.id ? (
-        <motion.div
-          layoutId="sidebar-item-indicator"
-          className="sidebar-item__active-bg"
-        />
-      ) : null}
-      <span className="sidebar-item__icon">
-        <IconComponent />
-      </span>
-      <motion.span
-        className="sidebar-item__title"
-        animate={{
-          clipPath: isSidebarCollapsed
-            ? "inset(0% 100% 0% 0%)"
-            : "inset(0% 0% 0% 0%)",
-          opacity: isSidebarCollapsed ? 0 : 1,
-        }}
+    <Link href={`/${item.id}`}>
+      <motion.div
+        layout
+        className={clsx("sidebar-item", {
+          "sidebar-item__active": activeTab === item.id,
+        })}
+        onFocus={() => setActiveTab(item.id)}
+        onMouseOver={() => setActiveTab(item.id)}
+        onMouseLeave={() => setActiveTab(item.id)}
       >
-        {item.title}
-      </motion.span>
-    </motion.div>
+        {activeTab === item.id ? (
+          <motion.div
+            layoutId="sidebar-item-indicator"
+            className="sidebar-item__active-bg"
+          />
+        ) : null}
+        <span className="sidebar-item__icon">
+          <IconComponent />
+        </span>
+        <motion.span
+          className="sidebar-item__title"
+          animate={{
+            clipPath: isSidebarCollapsed
+              ? "inset(0% 100% 0% 0%)"
+              : "inset(0% 0% 0% 0%)",
+            opacity: isSidebarCollapsed ? 0 : 1,
+          }}
+        >
+          {item.title}
+        </motion.span>
+      </motion.div>
+    </Link>
   );
 }
 
