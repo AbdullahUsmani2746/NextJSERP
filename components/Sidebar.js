@@ -15,12 +15,22 @@ import Link from "next/link";
 
 const SIDEBAR_ITEMS = [
   { id: "", title: "Dashboard", icon: LuHome },
-  { id: "organization", title: "Organization", icon: LuHome },
+  { id: "organizations", title: "Organization", icon: LuHome },
+  { id: "users", title: "Users", icon: LuHome },
+  { id: "products", title: "Products", icon: LuHome },
 
-  { id: "mail", title: "Mail", icon: LuMail },
-  { id: "projects", title: "Projects", icon: LuFolderClosed },
-  { id: "reports", title: "Reports", icon: LuStickyNote },
-  { id: "notifications", title: "Notifications", icon: LuBell },
+  { id: "vendors", title: "Vendors", icon: LuHome },
+  { id: "units", title: "Units", icon: LuHome },
+  { id: "brands", title: "Brands", icon: LuHome },
+  { id: "customers", title: "Customers", icon: LuHome },
+
+  { id: "companies", title: "Companies", icon: LuHome },
+  { id: "product_categories", title: "Product Categories", icon: LuHome },
+
+  
+
+
+
 ];
 
 function Sidebar() {

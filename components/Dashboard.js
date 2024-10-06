@@ -1,8 +1,8 @@
 "use client"; // Ensures the component is a client-side component
 
 import React, { useState, useEffect } from 'react';
-import OrganizationTable from './Tables/OrganizationTable';
-import OrganizationModal from './Modal/OrganizationModal';
+import OrganizationTable from './Tables/DynamicTable';
+import OrganizationModal from './Modal/DynamicModal';
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,19 +25,10 @@ const Dashboard = () => {
   return (
     <div className="flex-1 p-6 main-content">
       <div className="mb-6">
-        <button 
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          onClick={toggleModal}
-        >
-          Add Organization
-        </button>
+   
       </div>
 
-      <OrganizationTable organizations={organizations} />
-
-      {isModalOpen && (
-        <OrganizationModal toggleModal={toggleModal} />
-      )}
+     
     </div>
   );
 };
