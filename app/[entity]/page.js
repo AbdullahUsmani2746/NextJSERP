@@ -190,33 +190,38 @@ const entityConfig = {
 };
 
 const DynamicPage = ({ params }) => {
-  // Extract entity from pathname (assuming the entity is the first part of the path)
   const entity = entityConfig[params.entity];
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [error, setError] = useState(null);
 
+  // Fetch initial data
   const fetchData = async () => {
-    const response = await fetch(`/api/${params.entity}`);
-    const result = await response.json();
-    setData(result.data);
+    try {
+      const res = await fetch(`/api/${params.entity}`, {
+        next: { revalidate: 10 },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const initialData = await res.json();
+      setData(initialData.data); // Adjust based on your API response structure
+    } catch (err) {
+      console.error(err);
+      setError("Error fetching data.");
+    }
   };
 
   const handleAddOrEdit = async (item) => {
     const method = selectedItem ? "PUT" : "POST";
     const url = `/api/${params.entity}`;
 
-    // Handle image upload if there's a photo
     if (item.photo) {
-      console.log("Uploading photo:", item.photo);
-
       const imageData = new FormData();
-      imageData.append("file", item.photo); // Ensure the key matches what your API expects
-
-      // Log FormData entries for debugging
-      for (let [key, value] of imageData.entries()) {
-        console.log(key, value);
-      }
+      imageData.append("file", item.photo);
 
       const imageResponse = await fetch("/api/upload", {
         method: "POST",
@@ -224,18 +229,15 @@ const DynamicPage = ({ params }) => {
       });
 
       if (!imageResponse.ok) {
-        const errorMessage = await imageResponse.text(); // Get the error message
-        console.error("Error uploading file:", errorMessage); // Log the error
-        return; // Exit if there's an error
+        const errorMessage = await imageResponse.text();
+        console.error("Error uploading file:", errorMessage);
+        return;
       }
 
-      const { filename } = await imageResponse.json(); // Adjusted to match the response structure
-      item.photo = filename; // Save the returned filename to the form data
+      const { filename } = await imageResponse.json();
+      item.photo = filename;
     }
 
-    console.log("Final item data:", item);
-
-    // Proceed with the main fetch call for adding/updating the product
     await fetch(url, {
       method,
       headers: {
@@ -244,103 +246,100 @@ const DynamicPage = ({ params }) => {
       body: JSON.stringify(item),
     });
 
-    fetchData(); // Refresh the data
+    fetchData();
   };
 
   const handleDelete = async (id) => {
-    console.log(id);
     await fetch(`/api/${params.entity}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id }), // Pass the organization's ID to delete
+      body: JSON.stringify({ id }),
     });
-    fetchData(); // Refresh the data
+    fetchData();
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [params.entity]); // Include params.entity to refetch when the entity changes
 
   return (
-    <>
-      <MotionConfig transition={{ type: "spring", bounce: 0, duration: 0.4 }}>
-        <div className="app">
-          <Sidebar />
-          <div className="flex-1 p-6 main-content">
-            <div className="mb-6">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                {entity.name}
-              </h1>
-              <button
-                onClick={() => {
-                  setSelectedItem(null);
+    <MotionConfig transition={{ type: "spring", bounce: 0, duration: 0.4 }}>
+      <div className="app">
+        <Sidebar />
+        <div className="flex-1 p-6 main-content">
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              {entity.name}
+            </h1>
+            <button
+              onClick={() => {
+                setSelectedItem(null);
+                setModalOpen(true);
+              }}
+              className="bg-blue-600 text-white px-6 py-3 my-3 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+              Add {entity.name}
+            </button>
+
+            {/* Handle error display */}
+            {error && <p className="text-red-500">{error}</p>}
+
+            {params.entity === "products" ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                {data.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onEdit={() => {
+                      setSelectedItem(product);
+                      setModalOpen(true);
+                    }}
+                    onDelete={() => handleDelete(product._id)}
+                  />
+                ))}
+              </div>
+            ) : params.entity === "product_categories" ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                {data.map((category) => (
+                  <ProductCategoryCard
+                    key={category.id}
+                    category={category}
+                    onEdit={() => {
+                      setSelectedItem(category);
+                      setModalOpen(true);
+                    }}
+                    onDelete={() => handleDelete(category._id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <DynamicTable
+                data={data}
+                headers={entity.fields.map(
+                  (field) =>
+                    field.name.charAt(0).toUpperCase() + field.name.slice(1)
+                )}
+                onEdit={(item) => {
+                  setSelectedItem(item);
                   setModalOpen(true);
                 }}
-                className="bg-blue-600 text-white px-6 py-3 my-3 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-              >
-                Add {entity.name}
-              </button>
-
-              {/* Conditional rendering based on entity */}
-              {params.entity === "products" ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                  {data.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onEdit={() => {
-                        setSelectedItem(product);
-                        setModalOpen(true);
-                      }}
-                      onDelete={() => handleDelete(product._id)}
-                      className="rounded-lg border border-gray-200 shadow-md transition-transform transform hover:scale-105"
-                    />
-                  ))}
-                </div>
-              ) : params.entity === "product_categories" ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                  {data.map((category) => (
-                    <ProductCategoryCard
-                      key={category.id}
-                      category={category}
-                      onEdit={() => {
-                        setSelectedItem(category);
-                        setModalOpen(true);
-                      }}
-                      onDelete={() => handleDelete(category._id)}
-                      className="rounded-lg border border-gray-200 shadow-md transition-transform transform hover:scale-105"
-                    />
-                  ))}
-                </div>
-              ) : (
-                <DynamicTable
-                  data={data}
-                  headers={entity.fields.map(
-                    (field) =>
-                      field.name.charAt(0).toUpperCase() + field.name.slice(1)
-                  )}
-                  onEdit={(item) => {
-                    setSelectedItem(item);
-                    setModalOpen(true);
-                  }}
-                  onDelete={handleDelete}
-                />
-              )}
-
-              <DynamicModal
-                isOpen={modalOpen}
-                toggleModal={() => setModalOpen(false)}
-                onSubmit={handleAddOrEdit}
-                initialData={selectedItem}
-                entity={entity}
+                onDelete={handleDelete}
               />
-            </div>
+            )}
+
+            <DynamicModal
+              isOpen={modalOpen}
+              toggleModal={() => setModalOpen(false)}
+              onSubmit={handleAddOrEdit}
+              initialData={selectedItem}
+              entity={entity}
+            />
           </div>
         </div>
-      </MotionConfig>
-    </>
+      </div>
+    </MotionConfig>
   );
 };
 
