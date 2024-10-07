@@ -8,10 +8,11 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
     brands: [],
     units: [],
   });
-  const [loading, setLoading] = useState(true); // New loading state
+  const [loading, setLoading] = useState(false); // Initial loading set to false
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Set loading to true before fetching
       const fetchPromises = [];
 
       // Fetch organization data
@@ -50,23 +51,27 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
         );
       }
 
-      // Wait for all the relevant fetches and update state accordingly
-      const results = await Promise.all(fetchPromises);
-      const mergedResults = results.reduce(
-        (acc, curr) => ({ ...acc, ...curr }),
-        {}
-      );
-      setDropdownData((prevData) => ({ ...prevData, ...mergedResults }));
+      if (fetchPromises.length > 0) {
+        // Wait for all the relevant fetches and update state accordingly
+        const results = await Promise.all(fetchPromises);
+        const mergedResults = results.reduce(
+          (acc, curr) => ({ ...acc, ...curr }),
+          {}
+        );
+        setDropdownData((prevData) => ({ ...prevData, ...mergedResults }));
+      }
+
       setLoading(false); // Set loading to false after fetching
     };
 
-    if (
-      entity.fields.some((field) =>
-        ["organization", "product_category", "brand", "unit"].includes(
-          field.name
-        )
+    // Check if there are any fields that require fetching before running fetchData
+    const fieldsToFetch = entity.fields.some((field) =>
+      ["organization", "product_category", "brand", "unit"].includes(
+        field.name
       )
-    ) {
+    );
+
+    if (fieldsToFetch) {
       fetchData();
     }
 
