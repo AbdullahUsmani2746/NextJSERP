@@ -1,84 +1,96 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
   const [formData, setFormData] = useState({});
-  const [dropdownData, setDropdownData] = useState({ organizations: [], productCategories: [], brands: [], units: [] });
+  const [dropdownData, setDropdownData] = useState({
+    organizations: [],
+    productCategories: [],
+    brands: [],
+    units: [],
+  });
+  const [loading, setLoading] = useState(true); // New loading state
 
   useEffect(() => {
-    // Function to selectively fetch data based on required fields in entity
     const fetchData = async () => {
       const fetchPromises = [];
 
-      // Check if `organization_id` is needed
-      if (entity.fields.some(field => field.name === 'organization')) {
-        fetchPromises.push(fetch('/api/organizations').then(res => res.json()).then(data => ({ organizations: data.data })));
-        console.log()
+      // Fetch organization data
+      if (entity.fields.some((field) => field.name === "organization")) {
+        fetchPromises.push(
+          fetch("/api/organizations")
+            .then((res) => res.json())
+            .then((data) => ({ organizations: data.data }))
+        );
       }
 
-      // Check if `product_category_id` is needed
-      if (entity.fields.some(field => field.name === 'product_category')) {
-        fetchPromises.push(fetch('/api/product_categories').then(res => res.json()).then(data => ({ productCategories: data.data })));
+      // Fetch product category data
+      if (entity.fields.some((field) => field.name === "product_category")) {
+        fetchPromises.push(
+          fetch("/api/product_categories")
+            .then((res) => res.json())
+            .then((data) => ({ productCategories: data.data }))
+        );
       }
 
-      // Check if `brand_id` is needed
-      if (entity.fields.some(field => field.name === 'brand')) {
-        fetchPromises.push(fetch('/api/brands').then(res => res.json()).then(data => ({ brands: data.data })));
+      // Fetch brand data
+      if (entity.fields.some((field) => field.name === "brand")) {
+        fetchPromises.push(
+          fetch("/api/brands")
+            .then((res) => res.json())
+            .then((data) => ({ brands: data.data }))
+        );
       }
 
-      // Check if `unit_id` is needed
-      if (entity.fields.some(field => field.name === 'unit')) {
-        fetchPromises.push(fetch('/api/units').then(res => res.json()).then(data => ({ units: data.data })));
+      // Fetch unit data
+      if (entity.fields.some((field) => field.name === "unit")) {
+        fetchPromises.push(
+          fetch("/api/units")
+            .then((res) => res.json())
+            .then((data) => ({ units: data.data }))
+        );
       }
 
       // Wait for all the relevant fetches and update state accordingly
       const results = await Promise.all(fetchPromises);
-
-      const mergedResults = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-      console.log(mergedResults)
-      setDropdownData(prevData => ({ ...prevData, ...mergedResults }));
-      console.log(dropdownData)
-
+      const mergedResults = results.reduce(
+        (acc, curr) => ({ ...acc, ...curr }),
+        {}
+      );
+      setDropdownData((prevData) => ({ ...prevData, ...mergedResults }));
+      setLoading(false); // Set loading to false after fetching
     };
 
-    
-
-    // Call fetchData only if there are dropdowns to fetch
-    if (entity.fields.some(field => ['organization', 'product_category', 'brand', 'unit'].includes(field.name))) {
+    if (
+      entity.fields.some((field) =>
+        ["organization", "product_category", "brand", "unit"].includes(
+          field.name
+        )
+      )
+    ) {
       fetchData();
     }
 
-    if (initialData) {
-      setFormData(initialData);
-    } else {
-      setFormData({});
-    }
+    setFormData(initialData || {});
   }, [entity, initialData]);
 
-  useEffect(() => {
-    console.log('Updated dropdownData:', dropdownData);
-  }, [dropdownData]);
-  
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-  
-    // If the input type is 'file', capture the file object instead of a string
-    if (type === 'file') {
-      // Get the first file from the file input
+
+    if (type === "file") {
       const file = e.target.files[0];
-      
+      setFormData((prev) => ({ ...prev, [name]: file }));
+    } else if (type === "select-one") {
+      // Parse the selected option value (if it's a JSON string)
+      const selectedOption = JSON.parse(value);
       setFormData((prev) => ({
         ...prev,
-        [name]: file, // Store the file object in formData
+        [name + "_id"]: selectedOption.id, // Store the selected ID
+        [name]: selectedOption.name, // Store the selected name
       }));
     } else {
-      // Handle all other input types as usual
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -86,114 +98,73 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
     toggleModal();
   };
 
+  console.log(formData);
+  console.log("Dropdown Data: ", dropdownData);
+
+  // Conditionally render loading message or form
+  if (loading) {
+    return <div>Loading...</div>; // Display loading state while fetching data
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {entity.fields.map((field) => {
-        if (field.name === 'organization') {
+        if (
+          ["organization", "product_category", "brand", "unit"].includes(
+            field.name
+          )
+        ) {
           return (
             <select
               key={field.name}
               name={field.name}
-              value={formData[field.name] || ''}
+              value={JSON.stringify({
+                id: formData[field.name + "_id"],
+                name: formData[field.name],
+              })}
               onChange={handleChange}
               required={field.required}
-              className="border p-2 w-full"
+              className="mysleect border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             >
-              <option value="">Select Organization</option>
-              {dropdownData.organizations.map((org) => (
-                <option key={org._id} value={JSON.stringify({ id: org._id, name: org.name })}>
-                  {org.name}
-                </option>
-              ))}
-            </select>
-          );
-        } else if (field.name === 'product_category') {
-          return (
-            <select
-              key={field.name}
-              name={field.name}
-              value={formData[field.name] || ''}
-              onChange={handleChange}
-              required={field.required}
-              className="border p-2 w-full"
-            >
-              <option value="">Select Product Category</option>
-              {dropdownData.productCategories.map((category) => (
-                <option key={category._id} value={JSON.stringify({ id: category._id, name: category.name })}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          );
-        } else if (field.name === 'brand') {
-          return (
-            <select
-              key={field.name}
-              name={field.name}
-              value={formData[field.name] || ''}
-              onChange={handleChange}
-              required={field.required}
-              className="border p-2 w-full"
-            >
-              <option value="">Select Brand</option>
-              {dropdownData.brands.map((brand) => (
-                <option key={brand._id} value={JSON.stringify({ id: brand._id, name: brand.name })}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-          );
-        } else if (field.name === 'unit') {
-          return (
-            <select
-              key={field.name}
-              name={field.name}
-              value={formData[field.name] || ''}
-              onChange={handleChange}
-              required={field.required}
-              className="border p-2 w-full"
-            >
-              <option value="">Select Unit</option>
-              {dropdownData.units.map((unit) => (
-                <option key={unit._id} value={JSON.stringify({ id: unit._id, name: unit.name })}>
-                  {unit.name}
+              <option value="">Select {field.name.replace("_", " ")}</option>
+              {dropdownData[field.name + "s"]?.map((item) => (
+                <option
+                  key={item._id}
+                  value={JSON.stringify({ id: item._id, name: item.name })}
+                >
+                  {item.name}
                 </option>
               ))}
             </select>
           );
         } else {
           return (
-            <>
-            {field.type === 'file' ? ( // Check if the input type is 'file'
-              <input
-                key={field.name}
-                type={field.type}
-                name={field.name}
-                onChange={handleChange}
-                required={field.required}
-                className="border p-2 w-full"
-              />
-            ) : (
-              <input
-                key={field.name}
-                type={field.type}
-                name={field.name}
-                placeholder={field.placeholder}
-                value={formData[field.name] || ''}
-                onChange={handleChange}
-                required={field.required}
-                className="border p-2 w-full"
-              />
-            )}
-          </>
+            <input
+              key={field.name}
+              type={field.type}
+              name={field.name}
+              placeholder={field.placeholder}
+              value={formData[field.name] || ""}
+              onChange={handleChange}
+              required={field.required}
+              className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
           );
         }
       })}
-      <div className="flex justify-end">
-        <button type="button" className="bg-gray-500 text-white px-4 py-2 rounded mr-2" onClick={toggleModal}>
+
+      <div className="flex justify-end space-x-4">
+        <button
+          type="button"
+          className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+          onClick={toggleModal}
+        >
           Cancel
         </button>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
           Save
         </button>
       </div>

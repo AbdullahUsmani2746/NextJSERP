@@ -84,5 +84,39 @@
   padding: 32px;
 }
 
+/* Add this to your global CSS or a relevant CSS module */
+.btn-modern {
+  background-color: #4f46e5; /* Tailwind's indigo-600 */
+  color: white;
+  padding: 0.5rem 1rem; /* Adjust padding as needed */
+  border-radius: 0.375rem; /* Rounded */
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.btn-modern:hover {
+  background-color: #4338ca; /* Tailwind's indigo-700 */
+  transform: translateY(-1px); /* Lift effect on hover */
+}
+
+.btn-modern:active {
+  transform: translateY(0); /* Reset effect on click */
+}
+
+/* Add this to your global CSS or a relevant CSS module */
+h1 {
+  font-family: 'Inter', sans-serif; /* Example font */
+  font-size: 2rem; /* Adjust size */
+  font-weight: 700; /* Bold */
+  color: #1f2937; /* Tailwind's gray-800 */
+}
+
+p {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem; /* Adjust size */
+  color: #4b5563; /* Tailwind's gray-600 */
+}
 
 

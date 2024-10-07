@@ -49,27 +49,18 @@ export async function GET() {
   // PUT (Update) a unit
   export async function PUT(request) {
     try {
-      const { _id, name, symbol, organization } = await request.json();
+      const { _id, name, symbol, organization, organization_id } = await request.json();
       const db = await connectToDatabase();
       // Ensure organization_id is an object and not a string
-      let orgIdObject = organization;
-
-      // Check if organization_id was passed as a stringified object, and parse it if necessary
-      if (typeof organization === 'string') {
-        try {
-          orgIdObject = JSON.parse(organization);
-        } catch (error) {
-          console.error('Error parsing organization_id:', error);
-        }
-      }
+   
 
       await db.collection('units').updateOne(
         { _id: new ObjectId(_id) },
         { $set: { 
           name,
           symbol,
-          organization_id: orgIdObject.id, // Access the 'id' from the organization_id JSON object
-          organization: orgIdObject.name, // Access the 'id' from the organization_id JSON object
+          organization_id ,// Access the 'id' from the organization_id JSON object
+          organization ,// Access the 'id' from the organization_id JSON object
           updatedAt: new Date()} }
       );
       return NextResponse.json({ message: 'Unit updated successfully' }, { status: 200 });
