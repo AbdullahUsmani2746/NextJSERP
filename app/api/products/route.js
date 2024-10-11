@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+// Helper function to generate a unique barcode
+function generateBarcode() {
+  const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp for time uniqueness
+  const uniqueId = new ObjectId().toString().slice(-6); // Last 6 digits of MongoDB's ObjectId for global uniqueness
+  return `${timestamp}${uniqueId}`; // Concatenating both for the barcode
+}
+
 // GET all products
 export async function GET() {
     try {
@@ -16,27 +23,12 @@ export async function GET() {
   // POST a new product
   export async function POST(request) {
     try {
-      const { name, price, sku, product_category, brand, unit, organization, reference,slug,weight,stock_alert,photo} = await request.json();
+      const { name, price, sku, product_category,product_category_id, brand,brand_id, unit,unit_id, organization,organization_id, reference,slug,weight,stock_alert,photo} = await request.json();
       const db = await connectToDatabase();
-       // Ensure organization_id is an object and not a string
-       let orgIdObject = organization;
-       let catIdObject = product_category;
-       let brandIdObject = brand;
-       let unitdObject = unit;
+     
+      // Generate a unique barcode for the product
+      const barcode = generateBarcode();
 
-
-       // Check if organization_id was passed as a stringified object, and parse it if necessary
-       if (typeof organization === 'string') {
-         try {
-           orgIdObject = JSON.parse(organization);
-           catIdObject = JSON.parse(product_category);
-           brandIdObject = JSON.parse(brand);
-           unitdObject = JSON.parse(unit);
-
-         } catch (error) {
-           console.error('Error parsing organization_id:', error);
-         }
-       }
       const newProduct = {
         name,
         price,
@@ -46,14 +38,15 @@ export async function GET() {
         photo,
         reference,
         stock_alert,
-        organization_id: orgIdObject.id, 
-        organization: orgIdObject.name, 
-        product_category_id: catIdObject.id, 
-        product_category: catIdObject.name, 
-        brand_id: brandIdObject.id, 
-        brand: brandIdObject.name, 
-        unit_id: unitdObject.id, 
-        unit: unitdObject.name, 
+        organization_id, 
+        organization, 
+        product_category_id, 
+        product_category, 
+        brand_id, 
+        brand , 
+        unit_id, 
+        unit, 
+        barcode, // Adding the barcode to the product
         createdAt: new Date(),
       };
       await db.collection('products').insertOne(newProduct);

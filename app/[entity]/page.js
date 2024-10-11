@@ -266,9 +266,7 @@ const DynamicPage = ({ params }) => {
 
   return (
     <MotionConfig transition={{ type: "spring", bounce: 0, duration: 0.4 }}>
-      <div className="app">
-        <Sidebar />
-        <div className="flex-1 p-6 main-content">
+     
           <div className="mb-6">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
               {entity.name}
@@ -337,8 +335,6 @@ const DynamicPage = ({ params }) => {
               entity={entity}
             />
           </div>
-        </div>
-      </div>
     </MotionConfig>
   );
 };

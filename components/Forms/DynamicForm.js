@@ -8,14 +8,13 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
     brands: [],
     units: [],
   });
-  const [loading, setLoading] = useState(false); // Initial loading set to false
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Set loading to true before fetching
+      setLoading(true);
       const fetchPromises = [];
 
-      // Fetch organization data
       if (entity.fields.some((field) => field.name === "organization")) {
         fetchPromises.push(
           fetch("/api/organizations")
@@ -24,16 +23,14 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
         );
       }
 
-      // Fetch product category data
       if (entity.fields.some((field) => field.name === "product_category")) {
         fetchPromises.push(
           fetch("/api/product_categories")
             .then((res) => res.json())
-            .then((data) => ({ productCategories: data.data }))
+            .then((data) => ({ product_categorys: data.data }))
         );
       }
 
-      // Fetch brand data
       if (entity.fields.some((field) => field.name === "brand")) {
         fetchPromises.push(
           fetch("/api/brands")
@@ -42,7 +39,6 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
         );
       }
 
-      // Fetch unit data
       if (entity.fields.some((field) => field.name === "unit")) {
         fetchPromises.push(
           fetch("/api/units")
@@ -52,7 +48,6 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
       }
 
       if (fetchPromises.length > 0) {
-        // Wait for all the relevant fetches and update state accordingly
         const results = await Promise.all(fetchPromises);
         const mergedResults = results.reduce(
           (acc, curr) => ({ ...acc, ...curr }),
@@ -61,14 +56,11 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
         setDropdownData((prevData) => ({ ...prevData, ...mergedResults }));
       }
 
-      setLoading(false); // Set loading to false after fetching
+      setLoading(false);
     };
 
-    // Check if there are any fields that require fetching before running fetchData
     const fieldsToFetch = entity.fields.some((field) =>
-      ["organization", "product_category", "brand", "unit"].includes(
-        field.name
-      )
+      ["organization", "product_category", "brand", "unit"].includes(field.name)
     );
 
     if (fieldsToFetch) {
@@ -85,12 +77,11 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
       const file = e.target.files[0];
       setFormData((prev) => ({ ...prev, [name]: file }));
     } else if (type === "select-one") {
-      // Parse the selected option value (if it's a JSON string)
       const selectedOption = JSON.parse(value);
       setFormData((prev) => ({
         ...prev,
-        [name + "_id"]: selectedOption.id, // Store the selected ID
-        [name]: selectedOption.name, // Store the selected name
+        [name + "_id"]: selectedOption.id,
+        [name]: selectedOption.name,
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -103,60 +94,94 @@ const DynamicForm = ({ entity, initialData, onSubmit, toggleModal }) => {
     toggleModal();
   };
 
-  console.log(formData);
-  console.log("Dropdown Data: ", dropdownData);
+  // Custom file input for better UI
+  const renderFileInput = (field) => (
+    <div className="col-span-2">
+      <label className="block mb-2 text-sm font-medium text-gray-700">
+        {field.placeholder}
+      </label>
+      <input
+        type="file"
+        name={field.name}
+        onChange={handleChange}
+        className="hidden"
+        id={`file-input-${field.name}`}
+      />
+      <label
+        htmlFor={`file-input-${field.name}`}
+        className="cursor-pointer flex items-center justify-center py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        {field.placeholder}
+      </label>
+      {formData[field.name] && (
+        <span className="mt-2 block text-sm text-gray-600">
+          {formData[field.name].name}
+        </span>
+      )}
+    </div>
+  );
 
   // Conditionally render loading message or form
   if (loading) {
-    return <div>Loading...</div>; // Display loading state while fetching data
+    return <div>Loading...</div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {entity.fields.map((field) => {
-        if (
-          ["organization", "product_category", "brand", "unit"].includes(
-            field.name
-          )
-        ) {
-          return (
-            <select
-              key={field.name}
-              name={field.name}
-              value={JSON.stringify({
-                id: formData[field.name + "_id"],
-                name: formData[field.name],
-              })}
-              onChange={handleChange}
-              required={field.required}
-              className="mysleect border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            >
-              <option value="">Select {field.name.replace("_", " ")}</option>
-              {dropdownData[field.name + "s"]?.map((item) => (
-                <option
-                  key={item._id}
-                  value={JSON.stringify({ id: item._id, name: item.name })}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {entity.fields.map((field) => {
+          if (field.type === "file") {
+            return renderFileInput(field);
+          }
+
+          if (["organization", "product_category", "brand", "unit"].includes(field.name)) {
+            return (
+              <div key={field.name}>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Select {field.name.replace("_", " ")}
+                </label>
+                <select
+                  name={field.name}
+                  value={JSON.stringify({
+                    id: formData[field.name + "_id"],
+                    name: formData[field.name],
+                  })}
+                  onChange={handleChange}
+                  required={field.required}
+                  className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 >
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          );
-        } else {
-          return (
-            <input
-              key={field.name}
-              type={field.type}
-              name={field.name}
-              placeholder={field.placeholder}
-              value={formData[field.name] || ""}
-              onChange={handleChange}
-              required={field.required}
-              className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
-          );
-        }
-      })}
+                  <option value="">Select {field.name.replace("_", " ")}</option>
+                  {dropdownData[field.name + "s"]?.map((item) => (
+                    <option
+                      key={item._id}
+                      value={JSON.stringify({ id: item._id, name: item.name })}
+                    >
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          } else {
+            return (
+              <div key={field.name}>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {field.placeholder}
+                </label>
+                <input
+                  type={field.type}
+                  name={field.name}
+                  placeholder={field.placeholder}
+                  value={formData[field.name] || ""}
+                  onChange={handleChange}
+                  required={field.required}
+                  className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+            );
+          }
+        })}
+      </div>
 
       <div className="flex justify-end space-x-4">
         <button

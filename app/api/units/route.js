@@ -16,26 +16,16 @@ export async function GET() {
   // POST a new unit
   export async function POST(request) {
     try {
-      const { name, symbol , organization} = await request.json();
+      const { name, symbol , organization,organization_id} = await request.json();
       const db = await connectToDatabase();
 
-        // Ensure organization_id is an object and not a string
-     let orgIdObject = organization;
-
-     // Check if organization_id was passed as a stringified object, and parse it if necessary
-     if (typeof organization === 'string') {
-       try {
-         orgIdObject = JSON.parse(organization);
-       } catch (error) {
-         console.error('Error parsing organization_id:', error);
-       }
-     }
+   
 
       const newUnit = {
         name,
         symbol,
-        organization_id: orgIdObject.id, // Access the 'id' from the organization_id JSON object
-        organization: orgIdObject.name, // Access the 'id' from the organization_id JSON object
+        organization_id, // Access the 'id' from the organization_id JSON object
+        organization, // Access the 'id' from the organization_id JSON object
         createdAt: new Date(),
       };
 
@@ -51,7 +41,6 @@ export async function GET() {
     try {
       const { _id, name, symbol, organization, organization_id } = await request.json();
       const db = await connectToDatabase();
-      // Ensure organization_id is an object and not a string
    
 
       await db.collection('units').updateOne(
