@@ -266,77 +266,80 @@ const DynamicPage = ({ params }) => {
 
   return (
     <MotionConfig transition={{ type: "spring", bounce: 0, duration: 0.4 }}>
-     
-          <div className="mb-6">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              {entity.name}
-            </h1>
-            <button
-              onClick={() => {
-                setSelectedItem(null);
-                setModalOpen(true);
-              }}
-              className="bg-blue-600 text-white px-6 py-3 my-3 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-            >
-              Add {entity.name}
-            </button>
+      <div className="container mx-auto p-6">
+        <h1 className="text-4xl font-bold text-gray-800 mb-6">
+          {entity.name}
+        </h1>
+        <button
+          onClick={() => {
+            setSelectedItem(null);
+            setModalOpen(true);
+          }}
+          className="bg-blue-600 text-white px-6 py-3 mb-4 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+        >
+          Add {entity.name}
+        </button>
 
-            {/* Handle error display */}
-            {error && <p className="text-red-500">{error}</p>}
+        {/* Handle error display */}
+        {error && <p className="text-red-500 mb-4">{error}</p>}
 
-            {params.entity === "products" ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                {data.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onEdit={() => {
-                      setSelectedItem(product);
-                      setModalOpen(true);
-                    }}
-                    onDelete={() => handleDelete(product._id)}
-                  />
-                ))}
-              </div>
-            ) : params.entity === "product_categories" ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                {data.map((category) => (
-                  <ProductCategoryCard
-                    key={category.id}
-                    category={category}
-                    onEdit={() => {
-                      setSelectedItem(category);
-                      setModalOpen(true);
-                    }}
-                    onDelete={() => handleDelete(category._id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <DynamicTable
-                data={data}
-                headers={entity.fields.map(
-                  (field) =>
-                    field.name.charAt(0).toUpperCase() + field.name.slice(1)
-                )}
-                onEdit={(item) => {
-                  setSelectedItem(item);
+        {params.entity === "products" ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+            {data.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onEdit={() => {
+                  setSelectedItem(product);
                   setModalOpen(true);
                 }}
-                onDelete={handleDelete}
+                onDelete={() => handleDelete(product._id)}
+                className="transition-transform transform hover:scale-105"
               />
-            )}
-
-            <DynamicModal
-              isOpen={modalOpen}
-              toggleModal={() => setModalOpen(false)}
-              onSubmit={handleAddOrEdit}
-              initialData={selectedItem}
-              entity={entity}
-            />
+            ))}
           </div>
+        ) : params.entity === "product_categories" ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+            {data.map((category) => (
+              <ProductCategoryCard
+                key={category.id}
+                category={category}
+                onEdit={() => {
+                  setSelectedItem(category);
+                  setModalOpen(true);
+                }}
+                onDelete={() => handleDelete(category._id)}
+                className="transition-transform transform hover:scale-105"
+              />
+            ))}
+          </div>
+        ) : (
+          <DynamicTable
+            data={data}
+            headers={entity.fields.map(
+              (field) =>
+                field.name.charAt(0).toUpperCase() + field.name.slice(1)
+            )}
+            onEdit={(item) => {
+              setSelectedItem(item);
+              setModalOpen(true);
+            }}
+            onDelete={handleDelete}
+          />
+        )}
+
+        <DynamicModal
+          isOpen={modalOpen}
+          toggleModal={() => setModalOpen(false)}
+          onSubmit={handleAddOrEdit}
+          initialData={selectedItem}
+          entity={entity}
+        />
+      </div>
     </MotionConfig>
   );
 };
+
+
 
 export default DynamicPage;
