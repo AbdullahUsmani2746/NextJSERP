@@ -223,7 +223,7 @@ const POSPage = () => {
           <h2 className="text-lg font-bold mb-4">Select Payment Method</h2>
           <button
             onClick={handleCashPayment} // Directly handle cash payment
-            className="w-full bg-green-500 text-white py-2 rounded mb-2"
+            className="w-full bg-green-400 text-white py-2 rounded mb-2"
           >
             Cash
           </button>
