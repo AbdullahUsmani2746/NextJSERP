@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import DynamicTable from "@/components/Tables/DynamicTable";
 import DynamicModal from "@/components/Modal/DynamicModal";
 import ProductCard from "@/components/Cards/ProductCard";
+import ProductCardWoo from "@/components/Cards/ProductCardWoo";
+
 import ProductCategoryCard from "@/components/Cards/ProductCategoryCard";
 import { motion, MotionConfig } from "framer-motion";
 import Image from "next/image";
@@ -192,6 +194,7 @@ const entityConfig = {
 const DynamicPage = ({ params }) => {
   const entity = entityConfig[params.entity];
   const [data, setData] = useState([]);
+  const [Woodata, setWooData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [error, setError] = useState(null);
@@ -208,7 +211,16 @@ const DynamicPage = ({ params }) => {
       }
 
       const initialData = await res.json();
-      setData(initialData.data); // Adjust based on your API response structure
+      console.log(initialData.data)
+      if(params.entity==="products"){
+        setData(initialData.data.products); // Adjust based on your API response structure
+
+      }
+      else{
+        setData(initialData.data); // Adjust based on your API response structure
+
+      }
+      setWooData(initialData.data.wcProducts)
     } catch (err) {
       console.error(err);
       setError("Error fetching data.");
@@ -296,6 +308,19 @@ const DynamicPage = ({ params }) => {
                 onDelete={() => handleDelete(product._id)}
                 className="transition-transform transform hover:scale-105"
               />
+              
+            ))}
+            {Woodata.map((product) => (
+            <ProductCardWoo
+            key={product.id}
+            product={product}
+            onEdit={() => {
+              setSelectedItem(product);
+              setModalOpen(true);
+            }}
+            onDelete={() => handleDelete(product._id)}
+          />
+              
             ))}
           </div>
         ) : params.entity === "product_categories" ? (

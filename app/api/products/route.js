@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api'; // Import WooCommerce API
+
+
+// Initialize WooCommerce API
+const WooCommerce = new WooCommerceRestApi({
+  url: 'https://royalblue-sparrow-140525.hostingersite.com/', // Your store URL
+  consumerKey: process.env.WC_CONSUMER_KEY, // Your consumer key
+  consumerSecret: process.env.WC_CONSUMER_SECRET, // Your consumer secret
+  version: 'wc/v3', // WooCommerce WP REST API version
+});
 
 // Helper function to generate a unique barcode
 function generateBarcode() {
@@ -14,7 +24,14 @@ export async function GET() {
     try {
       const db = await connectToDatabase();
       const products = await db.collection('products').find().toArray();
-      return NextResponse.json({ data: products }, { status: 200 });
+
+       // Fetch products from WooCommerce as well
+    const wcProductsResponse = await WooCommerce.get("products");
+    const wcProducts = wcProductsResponse.data;
+
+      return NextResponse.json({ data: {products,wcProducts} }, { status: 200 });
+      // return NextResponse.json({ data: products }, { status: 200 });
+
     } catch (error) {
       return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
     }

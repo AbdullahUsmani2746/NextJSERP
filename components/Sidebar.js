@@ -26,6 +26,7 @@ const SIDEBAR_ITEMS = [
   { id: "products", title: "Products", icon: LuShoppingCart },
   { id: "vendors", title: "Vendors", icon: LuBriefcase },
   { id: "units", title: "Units", icon: LuBox },
+  { id: "POS", title: "POS", icon: LuBox },
   { id: "brands", title: "Brands", icon: LuTag },
   { id: "customers", title: "Customers", icon: LuUsers },
   { id: "companies", title: "Companies", icon: LuBuilding },

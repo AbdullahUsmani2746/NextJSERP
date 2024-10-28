@@ -15,7 +15,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     >
       <div className="w-full sm:w-48 h-48 mb-4 relative rounded-lg overflow-hidden flex-shrink-0">
         <Image
-          src={product.photo}
+          src={product.images[0].src}
           alt={product.name}
           layout="fill"
           objectFit="cover"
