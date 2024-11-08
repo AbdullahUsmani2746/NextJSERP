@@ -3,6 +3,11 @@ import './globals.css'; // Adjust the path if necessary for your global CSS
 import { Inter } from 'next/font/google'; // Example of importing fonts, modify as needed
 import { MotionConfig } from 'framer-motion';
 import Sidebar from '@/components/Sidebar'; // Adjust the path to your Sidebar component
+import { AppSidebar } from "@/components/app-sidebar"
+
+import {
+  SidebarProvider,
+} from "@/components/ui/sidebar"
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,12 +23,16 @@ export default function RootLayout({ children }) {
         {/* Add any additional head elements like meta tags, links, or scripts */}
       </head>
       <body className={inter.className}>
+      <SidebarProvider>
+
         <MotionConfig transition={{ type: "spring", bounce: 0, duration: 0.4 }}>
-          <div className="app">
-            <Sidebar />
-            <div className="flex-1 p-6">{children}</div> {/* Main content area */}
+          <div className="app w-full">
+          <AppSidebar />
+            <div className="flex-1">{children}</div> {/* Main content area */}
           </div>
         </MotionConfig>
+        </SidebarProvider>
+
       </body>
     </html>
   );

@@ -7,8 +7,19 @@ import ProductCardWoo from "@/components/Cards/ProductCardWoo";
 
 import ProductCategoryCard from "@/components/Cards/ProductCategoryCard";
 import { motion, MotionConfig } from "framer-motion";
-import Image from "next/image";
-import Sidebar from "@/components/Sidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 const entityConfig = {
   organizations: {
@@ -277,91 +288,108 @@ const DynamicPage = ({ params }) => {
   }, [params.entity]); // Include params.entity to refetch when the entity changes
 
   return (
+    <SidebarInset>
+    <header
+      className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+      <div className="flex items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink href="#">
+                Silk Store
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{entity.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+    </header>
     <MotionConfig transition={{ type: "spring", bounce: 0, duration: 0.4 }}>
-      <div className="container mx-auto p-6">
-        <h1 className="text-4xl font-bold text-gray-800 mb-6">
-          {entity.name}
-        </h1>
-        <button
-          onClick={() => {
-            setSelectedItem(null);
+    <div className="container mx-auto p-6">
+<div className="flex justify-end">
+      <button
+  onClick={() => {
+    setSelectedItem(null);
+    setModalOpen(true);
+  }}
+  className="bg-slate-700 text-slate-50 px-6 py-3 mb-4 rounded-lg shadow-sm transition-transform transform hover:bg-slate-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-opacity-50"
+>
+  Add {entity.name}
+</button>
+</div>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {/* Responsive Grid Layout */}
+      {params.entity === "products" ? (
+        <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 mt-4">
+          {data.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onEdit={() => {
+                setSelectedItem(product);
+                setModalOpen(true);
+              }}
+              onDelete={() => handleDelete(product._id)}
+              className="transition-transform transform hover:scale-105"
+            />
+          ))}
+          {Woodata.map((product) => (
+            <ProductCardWoo
+              key={product.id}
+              product={product}
+              onEdit={() => {
+                setSelectedItem(product);
+                setModalOpen(true);
+              }}
+              onDelete={() => handleDelete(product._id)}
+            />
+          ))}
+        </div>
+      ) : params.entity === "product_categories" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-4">
+          {data.map((category) => (
+            <ProductCategoryCard
+              key={category.id}
+              category={category}
+              onEdit={() => {
+                setSelectedItem(category);
+                setModalOpen(true);
+              }}
+              onDelete={() => handleDelete(category._id)}
+              className="transition-transform transform hover:scale-105"
+            />
+          ))}
+        </div>
+      ) : (
+        <DynamicTable
+          data={data}
+          headers={entity.fields.map(
+            (field) => field.name.charAt(0).toUpperCase() + field.name.slice(1)
+          )}
+          onEdit={(item) => {
+            setSelectedItem(item);
             setModalOpen(true);
           }}
-          className="bg-blue-600 text-white px-6 py-3 mb-4 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Add {entity.name}
-        </button>
-
-        {/* Handle error display */}
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-
-        {params.entity === "products" ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-            {data.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onEdit={() => {
-                  setSelectedItem(product);
-                  setModalOpen(true);
-                }}
-                onDelete={() => handleDelete(product._id)}
-                className="transition-transform transform hover:scale-105"
-              />
-              
-            ))}
-            {Woodata.map((product) => (
-            <ProductCardWoo
-            key={product.id}
-            product={product}
-            onEdit={() => {
-              setSelectedItem(product);
-              setModalOpen(true);
-            }}
-            onDelete={() => handleDelete(product._id)}
-          />
-              
-            ))}
-          </div>
-        ) : params.entity === "product_categories" ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-            {data.map((category) => (
-              <ProductCategoryCard
-                key={category.id}
-                category={category}
-                onEdit={() => {
-                  setSelectedItem(category);
-                  setModalOpen(true);
-                }}
-                onDelete={() => handleDelete(category._id)}
-                className="transition-transform transform hover:scale-105"
-              />
-            ))}
-          </div>
-        ) : (
-          <DynamicTable
-            data={data}
-            headers={entity.fields.map(
-              (field) =>
-                field.name.charAt(0).toUpperCase() + field.name.slice(1)
-            )}
-            onEdit={(item) => {
-              setSelectedItem(item);
-              setModalOpen(true);
-            }}
-            onDelete={handleDelete}
-          />
-        )}
-
-        <DynamicModal
-          isOpen={modalOpen}
-          toggleModal={() => setModalOpen(false)}
-          onSubmit={handleAddOrEdit}
-          initialData={selectedItem}
-          entity={entity}
+          onDelete={handleDelete}
         />
-      </div>
-    </MotionConfig>
+      )}
+
+      <DynamicModal
+        isOpen={modalOpen}
+        toggleModal={() => setModalOpen(false)}
+        onSubmit={handleAddOrEdit}
+        initialData={selectedItem}
+        entity={entity}
+      />
+    </div>
+  </MotionConfig>
+  </SidebarInset>
   );
 };
 

@@ -4,14 +4,13 @@ import { ObjectId } from 'mongodb';
 import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api'; // Import WooCommerce API
 
 
-// Initialize WooCommerce API
+// Initialize WooCommerce API 
 const WooCommerce = new WooCommerceRestApi({
   url: 'https://royalblue-sparrow-140525.hostingersite.com/', // Your store URL
   consumerKey: process.env.WC_CONSUMER_KEY, // Your consumer key
   consumerSecret: process.env.WC_CONSUMER_SECRET, // Your consumer secret
   version: 'wc/v3', // WooCommerce WP REST API version
 });
-
 // Helper function to generate a unique barcode
 function generateBarcode() {
   const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp for time uniqueness

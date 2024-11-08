@@ -4,11 +4,25 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '@/components/Cards/productCardPOS';
 import CategoryFilter from "@/components/CategoryFilter";
-import Notification from '@/components/Notification'; // Import Notification
-import Receipt from '@/components/Receipt'; // Import Receipt
-import Modal from '@/components/Modal'; // Import Modal
+import Notification from '@/components/Notification';
+import Receipt from '@/components/Receipt';
+import Modal from '@/components/Modal';
 import { motion } from 'framer-motion';
+import { FiSearch } from "react-icons/fi";
 import { AiOutlineDelete, AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 const POSPage = () => {
   const [products, setProducts] = useState([]);
@@ -21,17 +35,19 @@ const POSPage = () => {
   const [showReceipt, setShowReceipt] = useState(false);
   const [showReceiptTotal, setShowReceiptTotal] = useState(0);
   const [showReceiptCart, setShowReceiptCart] = useState([]);
-
   const [paymentMethod, setPaymentMethod] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showCashInputModal, setShowCashInputModal] = useState(false); // New state for cash input
-  const [refundAmount, setRefundAmount] = useState(0); // New state for refunds
+  const [showCashInputModal, setShowCashInputModal] = useState(false);
+  const [refundAmount, setRefundAmount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+
+
 
   useEffect(() => {
     const fetchProducts = async () => {
       const res = await fetch('/api/products');
       const data = await res.json();
-      setProducts(data.data.products);
+      setProducts(data.data.wcProducts);
     };
 
     const fetchCategories = async () => {
@@ -79,8 +95,8 @@ const POSPage = () => {
 
   const handleCashPayment = () => {
     setPaymentMethod('cash');
-    setShowCashInputModal(true); // Show cash input modal
-    setShowPaymentModal(false); // Close payment modal
+    setShowCashInputModal(true);
+    setShowPaymentModal(false);
   };
 
   const completeCashPayment = () => {
@@ -96,8 +112,8 @@ const POSPage = () => {
       setNotification('Transaction completed!');
       setTimeout(() => setNotification(''), 3000);
       setTotal(0);
-      setCashReceived(''); // Reset cash received input
-      setShowCashInputModal(false); // Close cash input modal
+      setCashReceived('');
+      setShowCashInputModal(false);
     } else {
       setNotification('Cash received is less than total. Please enter a valid amount.');
       setTimeout(() => setNotification(''), 3000);
@@ -114,7 +130,7 @@ const POSPage = () => {
     setNotification('Transaction completed!');
     setTimeout(() => setNotification(''), 3000);
     setTotal(0);
-    setShowPaymentModal(false); // Close payment modal
+    setShowPaymentModal(false);
   };
 
   const handleCompleteSale = () => {
@@ -126,39 +142,78 @@ const POSPage = () => {
     }
   };
 
+
+  // Update the filtered products based on the search term
   const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter(product => product.category === selectedCategory);
+    ? products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : products.filter(product => 
+        product.category === selectedCategory && product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
   return (
-    <div className="flex h-screen">
-      <div className="w-3/5 p-4 bg-gray-100">
-        <h2 className="text-xl font-bold mb-4">Products</h2>
+    <SidebarInset>
+    <header
+      className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+      <div className="flex items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink href="#">
+                Silk Store
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>POS System</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+    </header>
+    <div className="flex h-full">
+      <div className="w-[75%] px-4  mt-2">
+      {/* // Include this input element in your JSX for the search bar */}
+    
+          <div className="mb-4 w-full sm:max-w-xs relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-gray-100 border border-gray-300 rounded-full p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 pr-10 text-gray-900"
+          />
+          <FiSearch className="absolute right-3 top-4 text-gray-500" />
+        </div>
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid 2xl:grid-cols-4 xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1  gap-4 mt-4">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
           ))}
         </div>
       </div>
 
-      <div className="w-2/5 p-4 bg-white border-l">
-        <h2 className="text-xl font-bold mb-4">Cart & Checkout</h2>
-        <ul className="mb-4">
-          {cart.map((item) => (
+      <div className=" w-[25%] p-4 border-l-2 border-slate-400 flex justify-between flex-col">
+        <div>
+        <h2 className="text-2xl font-bold mb-4">Cart & Checkout</h2>
+        <ul className="space-y-4">
+        {cart.map((item) => (
             <motion.li 
               key={item.id}
-              className="flex justify-between items-center mb-2 relative"
+              className="flex justify-between items-center bg-white p-4 rounded-lg shadow"
               initial={{ opacity: 1 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, x: -100 }}
             >
-              <span>{item.name}</span>
-              <span>${item.price}</span>
+              <span className="font-semibold">{item.name}</span>
+              <span className="text-gray-700">${item.price}</span>
               <div className="flex items-center">
                 <motion.button 
                   onClick={() => updateCartQuantity(item.id, Math.max(item.quantity - 1, 1))}
@@ -173,7 +228,7 @@ const POSPage = () => {
                   min="1"
                   value={item.quantity}
                   onChange={(e) => updateCartQuantity(item.id, Number(e.target.value))}
-                  className="w-16 border rounded text-center mx-2"
+                  className="w-12 border rounded text-center mx-2"
                 />
                 <motion.button 
                   onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
@@ -186,7 +241,7 @@ const POSPage = () => {
               </div>
               <motion.button 
                 onClick={() => removeFromCart(item.id)} 
-                className="text-red-500 absolute right-0"
+                className="text-red-500"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -195,21 +250,24 @@ const POSPage = () => {
             </motion.li>
           ))}
         </ul>
-        <hr className="my-2" />
-        <div className="flex justify-between font-bold text-lg">
-          <span>Total:</span>
-          <span>${Number(total).toFixed(2)}</span>
         </div>
+
+        <div>
+          <hr className="my-4" />
+          <div className="flex justify-between font-bold text-xl">
+            <span>Total:</span>
+            <span>${Number(total).toFixed(2)}</span>
+          </div>
 
         <button
           onClick={handleCompleteSale}
-          className="w-full bg-blue-500 text-white py-2 rounded"
+          className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg shadow hover:bg-blue-700 transition duration-200"
         >
           Complete Sale
         </button>
+        </div>
       </div>
 
-      {/* Show Notification */}
       {notification && (
         <Notification 
           message={notification} 
@@ -217,12 +275,11 @@ const POSPage = () => {
         />
       )}
 
-      {/* Payment Method Selection Modal */}
       {showPaymentModal && (
         <Modal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)}>
           <h2 className="text-lg font-bold mb-4">Select Payment Method</h2>
           <button
-            onClick={handleCashPayment} // Directly handle cash payment
+            onClick={handleCashPayment}
             className="w-full bg-green-400 text-white py-2 rounded mb-2"
           >
             Cash
@@ -239,7 +296,6 @@ const POSPage = () => {
         </Modal>
       )}
 
-      {/* Cash Input Modal */}
       {showCashInputModal && (
         <Modal isOpen={showCashInputModal} onClose={() => setShowCashInputModal(false)}>
           <h2 className="text-lg font-bold mb-4">Enter Cash Received</h2>
@@ -247,43 +303,34 @@ const POSPage = () => {
             type="number"
             value={cashReceived}
             onChange={(e) => setCashReceived(e.target.value)}
-            className="w-full border rounded p-2 mb-4"
-            placeholder="Cash Received"
+            placeholder="Enter cash amount"
+            className="w-full p-2 border rounded mb-4"
           />
           <button
             onClick={completeCashPayment}
-            className="w-full bg-green-500 text-white py-2 rounded"
+            className="w-full bg-blue-500 text-white py-2 rounded"
           >
-            Confirm Payment
+            Complete Payment
           </button>
         </Modal>
       )}
 
-      {/* Receipt Modal */}
       {showReceipt && (
-        <Modal isOpen={showReceipt} onClose={() => setShowReceipt(false)}>
+                <Modal isOpen={showReceipt} onClose={() => setShowReceipt(false)}>
 
-        <Receipt 
-          cartItems={showReceiptCart}
+        <Receipt
           total={showReceiptTotal}
+          cartItems={showReceiptCart}
+          refundAmount={refundAmount}
           paymentMethod={paymentMethod}
-          refundAmount={refundAmount} // Include refund amount for display
-          storeDetails={{
-            name: "Your Store Name",
-            address: "Your Store Address",
-            phone: "Your Store Phone",
-          }}
-          onClose={() => {
-      setRefundAmount(0);
-      setShowReceipt(false);
-      setShowReceiptTotal(0);
-      setShowReceiptCart(0);
-          }}
+          onClose={() => setShowReceipt(false)}
         />
-                </Modal>
+        </Modal>
 
       )}
     </div>
+    </SidebarInset>
+
   );
 };
 
