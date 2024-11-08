@@ -20,6 +20,7 @@ export function NavMain({
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
+              <Link href={`/${item.url}`}>
           <Collapsible
             key={item.title}
             asChild
@@ -27,19 +28,22 @@ export function NavMain({
             className="group/collapsible">
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
+
                 <SidebarMenuButton tooltip={item.title}>
                 {item.icon && <item.icon />}
 
-                <Link href={`/${item.url}`}>
+                
                     <span>{item.title}</span>
-                    </Link>
                 
                  
           
                 </SidebarMenuButton>
+
               </CollapsibleTrigger>
             </SidebarMenuItem>
           </Collapsible>
+          </Link>
+
         ))}
       </SidebarMenu>
     </SidebarGroup>)
