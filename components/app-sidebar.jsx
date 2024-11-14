@@ -74,6 +74,12 @@ const data = {
       url: "organizations",
     },
     {
+      id: "orders",
+      title: "Orders",
+      icon: Building,
+      url: "orders",
+    },
+    {
       id: "users",
       title: "Users",
       icon: User,
