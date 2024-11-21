@@ -88,6 +88,79 @@ const entityConfig = {
       },
     ],
   },
+  sales_return: {
+    name: "Sales Returns",
+    fields: [
+      {
+        name: "invoice_no",
+        type: "text",
+        placeholder: "Invoice Number",
+        required: true,
+      },
+      {
+        name: "date",
+        type: "date",
+        placeholder: "Return Date",
+        required: true,
+      },
+      {
+        name: "time",
+        type: "time",
+        placeholder: "Return Time",
+        required: true,
+      },
+      {
+        name: "customer_name",
+        type: "text",
+        placeholder: "Customer Name",
+        required: true,
+      },
+      {
+        name: "customer_contact_no",
+        type: "text",
+        placeholder: "Customer Contact Number",
+        required: true,
+      },
+      {
+        name: "products_returned",
+        type: "array",
+        placeholder: "Products Returned",
+        fields: [
+          {
+            name: "product_name",
+            type: "text",
+            placeholder: "Product Name",
+            required: true,
+          },
+          {
+            name: "quantity",
+            type: "number",
+            placeholder: "Quantity Returned",
+            required: true,
+          },
+          {
+            name: "rate",
+            type: "number",
+            placeholder: "Original Rate",
+            required: true,
+          },
+          {
+            name: "amount",
+            type: "number",
+            placeholder: "Refund Amount",
+            required: true,
+          },
+        ],
+        required: true,
+      },
+      {
+        name: "total_amount_refunded",
+        type: "number",
+        placeholder: "Total Refund Amount",
+        required: true,
+      },
+    ],
+  },
 
   users: {
     name: "Users",

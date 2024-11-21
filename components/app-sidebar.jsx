@@ -74,10 +74,17 @@ const data = {
       url: "organizations",
     },
     {
-      id: "orders",
-      title: "Orders",
+      id: "Orders",
+      title: "Sale Orders",
       icon: Building,
       url: "orders",
+    },
+
+    {
+      id: "sales_returns",
+      title: "Sale Return Orders",
+      icon: Building,
+      url: "sales_return",
     },
     {
       id: "users",
@@ -108,6 +115,13 @@ const data = {
       title: "POS",
       icon: Square,
       url: "POS",
+      
+    },
+    {
+      id: "SaleReturn",
+      title: "Sale Return",
+      icon: Square,
+      url: "SaleReturn",
       
     },
     {

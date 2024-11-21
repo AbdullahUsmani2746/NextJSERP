@@ -2,12 +2,31 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-// GET all orders
-export async function GET() {
+// GET all orders or search by invoice_no
+export async function GET(request) {
   try {
     const db = await connectToDatabase();
-    const orders = await db.collection("orders").find().toArray();
-    return NextResponse.json({ data: orders }, { status: 200 });
+    const url = new URL(request.url);
+    const invoiceNo = url.searchParams.get("invoice_no"); // Get 'invoice_no' from query params
+
+    if (invoiceNo) {
+      // Search for a specific order by invoice_no
+      const order = await db
+        .collection("orders")
+        .findOne({ invoice_no: invoiceNo });
+      if (order) {
+        return NextResponse.json({ data: order }, { status: 200 });
+      } else {
+        return NextResponse.json(
+          { error: "Order not found with the provided invoice_no" },
+          { status: 404 }
+        );
+      }
+    } else {
+      // Return all orders if no invoice_no is provided
+      const orders = await db.collection("orders").find().toArray();
+      return NextResponse.json({ data: orders }, { status: 200 });
+    }
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch orders" },
