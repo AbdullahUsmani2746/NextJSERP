@@ -40,12 +40,21 @@ const SaleReturn = () => {
 
   // Add product to return cart
   const addToReturnCart = (product) => {
+    console.log(`Product " ${JSON.stringify(product, null, 2)}`);
     setReturnCart((prevCart) => {
-      const existingProduct = prevCart.find((item) => item.id === product.id);
+      const existingProduct = prevCart.find(
+        (item) => item.product_name === product.product_name
+      );
+      console.log(
+        `existingProduct " ${JSON.stringify(existingProduct, null, 2)}`
+      );
+
       if (existingProduct) {
         return prevCart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+          item.product_name === product.product_name
+            ? item.quantity < product.quantity
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
             : item
         );
       }
@@ -56,8 +65,11 @@ const SaleReturn = () => {
   };
 
   // Remove product from return cart
-  const removeFromReturnCart = (id) => {
-    setReturnCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  const removeFromReturnCart = (product_name) => {
+    console.log("return Cart Id: " + product_name);
+    setReturnCart((prevCart) =>
+      prevCart.filter((item) => item.product_name !== product_name)
+    );
     setNotification("Product removed from return cart.");
     setTimeout(() => setNotification(""), 3000);
   };
@@ -141,7 +153,7 @@ const SaleReturn = () => {
           </Breadcrumb>
         </div>
       </header>
-      <div className="p-6 flex flex-col gap-6 h-full">
+      <div className="p-6 flex flex-col gap-6 h-full relative">
         {notification && <Notification message={notification} />}
         <h2 className="text-3xl font-bold mb-4 text-gray-800">Sale Return</h2>
 
@@ -181,8 +193,9 @@ const SaleReturn = () => {
                   key={product.id}
                   className="flex justify-between items-center bg-gray-50 p-4 rounded-lg shadow"
                 >
-                  <span>{product.product_name}</span>
-                  <span>${product.rate}</span>
+                  <span>Name: {product.product_name}</span>
+                  <span>Price: ${product.rate}</span>
+                  <span>Quanitty: {product.quantity}</span>
                   <motion.button
                     onClick={() => addToReturnCart(product)}
                     className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
@@ -199,7 +212,7 @@ const SaleReturn = () => {
 
         {/* Return Cart */}
         {returnCart.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-gray-50 p-6 shadow-lg">
+          <div className="bg-gray-50 p-6 shadow-lg">
             <h3 className="text-lg font-semibold mb-2">Return Cart</h3>
             <ul className="space-y-2">
               {returnCart.map((item) => (
@@ -211,7 +224,7 @@ const SaleReturn = () => {
                   <span>${item.rate}</span>
                   <span>Qty: {item.quantity}</span>
                   <motion.button
-                    onClick={() => removeFromReturnCart(item.id)}
+                    onClick={() => removeFromReturnCart(item.product_name)}
                     className="text-red-500"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
