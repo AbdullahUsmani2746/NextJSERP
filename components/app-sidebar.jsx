@@ -125,6 +125,18 @@ const data = {
       
     },
     {
+      id: "purchase",
+      title: "Purchase",
+      icon: ShoppingCart,
+      url: "Purchase",
+    },
+    {
+      id: "purchaseReturn",
+      title: "Purchase Order Return",
+      icon: ShoppingCart,
+      url: "PurchaseReturn",
+    },
+    {
       id: "brands",
       title: "Brands",
       icon: Tag,
