@@ -174,7 +174,7 @@ const Dashboard = () => {
           <p className="text-3xl">{salesData.totalOrders}</p>
         </div>
         <div className="bg-white shadow-lg p-6 rounded-lg text-center">
-          <h2 className="text-lg font-semibold">Total Products</h2>
+          <h2 className="text-lg font-semibold">Total Products Sale</h2>
           <p className="text-3xl">{salesData.totalProducts}</p>
         </div>
         <div className="bg-white shadow-lg p-6 rounded-lg text-center">

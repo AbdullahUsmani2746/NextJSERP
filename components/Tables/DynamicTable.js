@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BiSolidEdit } from "react-icons/bi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiSearch } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
+import { LuX } from "react-icons/lu"; // Lucid X icon for closing modal
 
 const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,9 +14,12 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
 
-  // Date Range State
+  const [paymentMethod, setPaymentMethod] = useState(""); // "Cash" or "Card"
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Set items per page to 10
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -27,8 +31,8 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
     );
   };
 
+  // Filtered Data based on search term, date range, and payment method
   const filteredData = data.filter((item) => {
-    // Filter based on search term
     const matchesSearchTerm = headers.some((header) =>
       item[header.toLowerCase()]
         ?.toString()
@@ -36,21 +40,51 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
         .includes(searchTerm.toLowerCase())
     );
 
-    // Filter based on date range
     const matchesDateRange =
       (!fromDate || new Date(item.date) >= new Date(fromDate)) &&
       (!toDate || new Date(item.date) <= new Date(toDate));
 
-    return matchesSearchTerm && matchesDateRange;
+    const matchesPaymentMethod =
+      !paymentMethod ||
+      item.payment_method?.toLowerCase() === paymentMethod.toLowerCase();
+
+    return matchesSearchTerm && matchesDateRange && matchesPaymentMethod;
   });
+
+  // Calculate Grand Total for filtered data
+  const grandTotal = filteredData.reduce(
+    (total, item) => total + (item.total_amount || 0),
+    0
+  );
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleViewProducts = (products) => {
     setSelectedProducts(products);
-    setProductModalOpen(true);
+    setProductModalOpen(true); // Open modal when viewing products
+  };
+
+  const handleCloseModal = () => {
+    setProductModalOpen(false); // Close modal when done
   };
 
   return (
     <div className="p-4 sm:p-6 bg-white text-text rounded-lg shadow-lg">
+      {/* Grand Total */}
+      {entity.name === "Orders" && (
+        <div className="m-4 flex justify-base text-lg font-bold text-text text-center ">
+          Grand Total: ${grandTotal.toFixed(2)}
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         {/* Search Bar */}
         <div className="mb-4 sm:mb-0 sm:mr-4 w-full sm:max-w-xs relative">
@@ -66,48 +100,67 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
 
         {/* Date Range Filter */}
         <div className="flex space-x-2 mt-4 sm:mt-0">
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 text-text"
-          />
-          <span className="text-text">to</span>
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 text-text"
-          />
+          {entity.name === "Orders" && (
+            <>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="border border-gray-300 rounded-md p-2 text-text"
+              />
+              <span className="text-text">to</span>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="border border-gray-300 rounded-md p-2 text-text"
+              />
+            </>
+          )}
         </div>
 
-        {/* Column Visibility Dropdown */}
+        {/* Payment Method Dropdown */}
+        {entity.name === "Orders" && (
+          <div className="relative">
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="bg-gray-100 border border-gray-300 rounded-md p-2 text-text focus:outline-none hover:bg-gray-200 transition duration-300"
+            >
+              <option value="">All Payment Methods</option>
+              <option value="cash">Cash</option>
+              <option value="card">Card</option>
+            </select>
+          </div>
+        )}
+
+        {/* Show/Hide Columns Dropdown */}
         <div className="relative">
           <button
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center bg-gray-100 border border-gray-300 rounded-md p-2 text-text focus:outline-none hover:bg-gray-200 transition duration-300"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="bg-gray-100 p-2 text-text rounded-md border border-gray-300 focus:outline-none"
           >
-            Columns
-            <IoIosArrowDown className="ml-2" />
+            <IoIosArrowDown className="inline mr-2" />
+            Show/Hide Columns
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-3">
-              {headers.map((header) => (
-                <label
-                  key={header}
-                  className="flex items-center py-1 text-text"
-                >
-                  <input
-                    type="checkbox"
-                    checked={
-                      visibleHeaders.find((h) => h.name === header)?.visible
-                    }
-                    onChange={() => toggleHeaderVisibility(header)}
-                    className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded transition duration-150 ease-in-out mr-2"
-                  />
-                  <span>{header}</span>
-                </label>
-              ))}
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-md z-50">
+              <ul className="py-2 text-sm">
+                {headers.map((header) => (
+                  <li
+                    key={header}
+                    className="px-4 py-2 flex justify-between items-center hover:bg-gray-100 cursor-pointer"
+                    onClick={() => toggleHeaderVisibility(header)}
+                  >
+                    <span>{header}</span>
+                    <span className="text-xs text-gray-500">
+                      {visibleHeaders.find((h) => h.name === header)?.visible
+                        ? "Hide"
+                        : "Show"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
@@ -134,8 +187,8 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
             </tr>
           </thead>
           <tbody className="text-text">
-            {filteredData.length > 0 ? (
-              filteredData.map((item) => (
+            {currentItems.length > 0 ? (
+              currentItems.map((item) => (
                 <tr
                   key={item._id}
                   className="hover:bg-gray-100 transition duration-300"
@@ -143,10 +196,9 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
                   {visibleHeaders
                     .filter((h) => h.visible)
                     .map((header) => {
-                      // Handle the nested product data when entity is "orders"
                       if (
                         header.name.toLowerCase() === "products_purchased" &&
-                        entity === "orders"
+                        entity.name === "Orders"
                       ) {
                         return (
                           <td
@@ -165,7 +217,6 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
                         );
                       }
 
-                      // Regular table rendering for non-nested fields
                       if (header.name.toLowerCase() === "photo") {
                         return (
                           <td
@@ -175,59 +226,41 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
                             <img
                               src={item.photo}
                               alt="Product"
-                              className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover mx-auto"
+                              className="w-12 h-12 rounded-full mx-auto"
                             />
                           </td>
                         );
                       }
 
-                      // Render standard fields, such as text
                       return (
                         <td
                           key={header.name}
                           className="py-3 px-2 sm:px-4 text-sm border-b border-gray-300"
                         >
-                          {typeof item[header.name.toLowerCase()] ===
-                          "object" ? (
-                            <button
-                              onClick={() =>
-                                handleViewProducts(item.products_purchased)
-                              }
-                              className="bg-blue-500 text-white px-2 py-1 rounded-md transition duration-300 hover:bg-blue-600 text-xs sm:text-sm"
-                            >
-                              View Products
-                            </button>
-                          ) : (
-                            item[header.name.toLowerCase()]
-                          )}
+                          {item[header.name.toLowerCase()]}
                         </td>
                       );
                     })}
-                  <td className="py-3 px-2 sm:px-4 flex justify-center items-center space-x-2">
+                  <td className="py-3 px-2 sm:px-4 text-sm border-b border-gray-300">
                     <button
                       onClick={() => onEdit(item)}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded-md transition duration-300 hover:bg-yellow-600 flex items-center text-xs sm:text-sm"
+                      className="text-green-500 hover:text-green-700 mr-2"
                     >
-                      <BiSolidEdit className="mr-1" />
-                      Edit
+                      <BiSolidEdit />
                     </button>
                     <button
                       onClick={() => onDelete(item._id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded-md transition duration-300 hover:bg-red-600 flex items-center text-xs sm:text-sm"
+                      className="text-red-500 hover:text-red-700"
                     >
-                      <RiDeleteBin6Line className="mr-1" />
-                      Delete
+                      <RiDeleteBin6Line />
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={visibleHeaders.filter((h) => h.visible).length + 1}
-                  className="text-center py-8 font-bold text-text"
-                >
-                  No data available
+                <td colSpan={headers.length + 1} className="py-3 text-center">
+                  No data found.
                 </td>
               </tr>
             )}
@@ -235,27 +268,70 @@ const DynamicTable = ({ data, onEdit, onDelete, headers, entity }) => {
         </table>
       </div>
 
-      {/* Product Modal */}
-      {productModalOpen && selectedProducts.length > 0 && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-semibold text-text">
-              Purchased Products
-            </h2>
-            <div className="mt-4">
-              {selectedProducts.map((product, index) => (
-                <div key={index} className="flex justify-between py-2 border-b">
-                  <span>{product.name}</span>
-                  <span>{product.quantity}</span>
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-4">
+        <div>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="text-text text-sm"
+          >
+            Previous
+          </button>
+          <span className="mx-2 text-text text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="text-text text-sm"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      {/* Modal for Product Viewing */}
+      {productModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="relative bg-white p-8 rounded-xl w-11/12 max-w-lg shadow-xl">
+            <h3 className="text-3xl font-bold text-gray-900 mb-6">
+              Product Details
+            </h3>
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-2xl"
+            >
+              X
+            </button>
+            <div className="overflow-y-auto p-4 max-h-[500px]">
+              {selectedProducts.map((product) => (
+                <div key={product.product_name} className="mb-8">
+                  {/* Product Name */}
+                  <p className="text-xl font-semibold text-gray-800 mb-2">
+                    {product.product_name}
+                  </p>
+
+                  {/* Product Rate and Quantity in Flexbox layout */}
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Rate</p>
+                      <p className="text-lg font-medium text-gray-800">
+                        ${parseFloat(product.rate).toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Quantity</p>
+                      <p className="text-lg font-medium text-gray-800">
+                        {product.quantity}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Separator */}
+                  <div className="h-1 bg-gray-100 my-4 rounded-full"></div>
                 </div>
               ))}
             </div>
-            <button
-              onClick={() => setProductModalOpen(false)}
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-            >
-              Close
-            </button>
           </div>
         </div>
       )}
