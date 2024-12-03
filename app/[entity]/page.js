@@ -34,6 +34,12 @@ const entityConfig = {
     name: "Orders",
     fields: [
       {
+        name: "payment_method",
+        type: "text",
+        placeholder: "Payment Method",
+        required: true,
+      },
+      {
         name: "invoice_no",
         type: "text",
         placeholder: "Invoice Number",
@@ -454,7 +460,7 @@ const DynamicPage = ({ params }) => {
           {/* Responsive Grid Layout */}
           {params.entity === "products" ? (
             <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 mt-4">
-              {data.map((product) => (
+              {/* {data.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -465,7 +471,7 @@ const DynamicPage = ({ params }) => {
                   onDelete={() => handleDelete(product._id)}
                   className="transition-transform transform hover:scale-105"
                 />
-              ))}
+              ))} */}
               {Woodata.map((product) => (
                 <ProductCardWoo
                   key={product.id}

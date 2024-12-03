@@ -3,8 +3,7 @@ import Image from "next/image";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
 
-const ProductCard = ({ product, onEdit, onDelete }) => {
-  
+const ProductCardWoo = ({ product, onEdit, onDelete }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -28,9 +27,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
         </h2>
         <p className="text-gray-700 mb-1">
           Price:{" "}
-          <span className="text-gray-900 font-semibold">
-            ${product.price}
-          </span>
+          <span className="text-gray-900 font-semibold">${product.price}</span>
         </p>
         <p className="text-gray-700 mb-1">
           SKU:{" "}
@@ -64,4 +61,4 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
   );
 };
 
-export default ProductCard;
+export default ProductCardWoo;

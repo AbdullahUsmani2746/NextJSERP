@@ -49,6 +49,7 @@ export async function POST(request) {
       rate,
       amount,
       total_amount,
+      payment_method,
     } = await request.json();
 
     const db = await connectToDatabase();
@@ -64,6 +65,7 @@ export async function POST(request) {
       rate,
       amount,
       total_amount,
+      payment_method,
       createdAt: new Date(), // Store the creation time
     };
 
@@ -92,6 +94,7 @@ export async function PUT(request) {
       rate,
       amount,
       total_amount,
+      payment_method,
     } = await request.json();
     const db = await connectToDatabase();
 
@@ -109,6 +112,7 @@ export async function PUT(request) {
           rate,
           amount,
           total_amount,
+          payment_method,
           updatedAt: new Date(), // Store the update time
         },
       }

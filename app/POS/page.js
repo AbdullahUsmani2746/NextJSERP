@@ -115,9 +115,11 @@ const POSPage = () => {
     }
   };
 
-  const submitOrder = async (cart, total) => {
+  const submitOrder = async (cart, total, method) => {
+    console.log(method);
     const orderData = {
       invoice_no: `INV-${Date.now()}`, // Example invoice number generation
+      payment_method: method,
       date: new Date().toISOString().split("T")[0], // Order date in YYYY-MM-DD format
       time: new Date().toLocaleTimeString(), // Order time
       customer_name: customerName, // Replace with actual customer name if available
@@ -170,7 +172,7 @@ const POSPage = () => {
 
       setCart([]);
       // Call submitOrder to save the order
-      submitOrder(cart, total).then((result) => {
+      submitOrder(cart, total, "Cash").then((result) => {
         if (result.success) {
           setNotification("Transaction completed!");
         } else {
@@ -198,7 +200,14 @@ const POSPage = () => {
     setRefundAmount(0);
 
     setCart([]);
-    setNotification("Transaction completed!");
+
+    submitOrder(cart, total, "Card").then((result) => {
+      if (result.success) {
+        setNotification("Transaction completed!");
+      } else {
+        setNotification("Transaction completed, but order could not be saved!");
+      }
+    });
     setTimeout(() => setNotification(""), 3000);
     setTotal(0);
     setShowPaymentModal(false);

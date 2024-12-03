@@ -1,71 +1,85 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    darkMode: ["class"],
-    content: [
+  darkMode: ["class"],
+  content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-  	extend: {
-  		colors: {
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
-  			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			},
-  			sidebar: {
-  				DEFAULT: 'hsl(var(--sidebar-background))',
-  				foreground: 'hsl(var(--sidebar-foreground))',
-  				primary: 'hsl(var(--sidebar-primary))',
-  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-  				accent: 'hsl(var(--sidebar-accent))',
-  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-  				border: 'hsl(var(--sidebar-border))',
-  				ring: 'hsl(var(--sidebar-ring))'
-  			}
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		}
-  	}
+    extend: {
+      colors: {
+		primary: "#5A67D8",  // custom primary color
+        secondary: "#ECC94B", // custom secondary color
+        accent: "#F56565",    // custom accent color
+        text: "#2D3748", // custom text color
+        background: "#FFFFFF", // White background
+        foreground: "#000000", // Black text color
+
+        card: {
+          DEFAULT: "#FFFFFF", // White card background
+          foreground: "#000000", // Black text color for cards
+        },
+
+        popover: {
+          DEFAULT: "#FFFFFF", // White popover background
+          foreground: "#000000", // Black text color for popovers
+        },
+
+        primary: {
+          DEFAULT: "#A40C0D", // Primary red color
+          foreground: "#A40C0D", // White text on red buttons
+        },
+
+        secondary: {
+          DEFAULT: "#A40C0D", // Secondary red for accents
+          foreground: "#A40C0D", // White text color for secondary elements
+        },
+
+        muted: {
+          DEFAULT: "#F0F0F0", // Light gray muted background
+          foreground: "#A40C0D", // Red text for muted elements
+        },
+
+        accent: {
+          DEFAULT: "#A40C0D", // Red accent color
+          foreground: "#FFFFFF", // White text on red accents
+        },
+
+        destructive: {
+          DEFAULT: "#A40C0D", // Red for destructive actions
+          foreground: "#FFFFFF", // White text on destructive actions
+        },
+
+        border: "#D1D5DB", // Light gray border
+        input: "#F3F4F6", // Light gray for input fields
+        ring: "#A40C0D", // Red ring for focus
+        chart: {
+          1: "#A40C0D", // Chart red color
+          2: "#F8D7DA", // Light red for charts
+          3: "#A40C0D",
+          4: "#F8D7DA",
+          5: "#A40C0D",
+        },
+
+        sidebar: {
+          DEFAULT: "#FFFFFF", // White sidebar background
+          foreground: "#000000", // Black text color for sidebar
+          primary: "#A40C0D", // Red sidebar primary
+          "primary-foreground": "#FFFFFF", // White text on red sidebar primary
+          accent: "#F0F0F0", // Light gray sidebar accent
+          "accent-foreground": "#A40C0D", // Red text on accent elements
+          border: "#D1D5DB", // Gray border for sidebar
+          ring: "#A40C0D", // Red ring for sidebar
+        },
+      },
+
+      borderRadius: {
+        lg: "var(--radius)", // Use custom radius
+        md: "calc(var(--radius) - 2px)", // Use custom radius
+        sm: "calc(var(--radius) - 4px)", // Use custom radius
+      },
+    },
   },
   plugins: [require("tailwindcss-animate")],
 };
