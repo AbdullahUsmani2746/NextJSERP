@@ -36,12 +36,14 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
+import Logo from '@/public/silk-1.webp'
+
 // This is sample data.
 const data = {
   user: {
     name: "Silky Silk FLowers",
     email: "silkysilk@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: Logo.src,
   },
   teams: [
     {
@@ -64,7 +66,7 @@ const data = {
     },
     {
       id: "Orders",
-      title: "Sale Orders",
+      title: "Sale Register",
       icon: Building,
       url: "orders",
     },
@@ -176,13 +178,13 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
+      name: "Stock Ledger",
+      url: "StockLedger",
       icon: Frame,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
+      name: "Stock Activity",
+      url: "StockActivity",
       icon: PieChart,
     },
     {
